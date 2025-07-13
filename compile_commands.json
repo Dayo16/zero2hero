@@ -1,0 +1,41 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Iinclude",
+      "-o",
+      "obj/file.o",
+      "src/file.c"
+    ],
+    "directory": "/home/dayo/low_level/zero_2_hero/dbproj",
+    "file": "/home/dayo/low_level/zero_2_hero/dbproj/src/file.c",
+    "output": "/home/dayo/low_level/zero_2_hero/dbproj/obj/file.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Iinclude",
+      "-o",
+      "obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/dayo/low_level/zero_2_hero/dbproj",
+    "file": "/home/dayo/low_level/zero_2_hero/dbproj/src/main.c",
+    "output": "/home/dayo/low_level/zero_2_hero/dbproj/obj/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Iinclude",
+      "-o",
+      "obj/parse.o",
+      "src/parse.c"
+    ],
+    "directory": "/home/dayo/low_level/zero_2_hero/dbproj",
+    "file": "/home/dayo/low_level/zero_2_hero/dbproj/src/parse.c",
+    "output": "/home/dayo/low_level/zero_2_hero/dbproj/obj/parse.o"
+  }
+]
