@@ -14,12 +14,41 @@
 void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {}
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
-                 char *addstring) {}
+                 char *addstring) {
+  printf("Add string value: %s\n", addstring);
+
+  return STATUS_SUCCESS;
+}
 
 int read_employees(int fd, struct dbheader_t *dbhdr,
-                   struct employee_t **employeesOut) {}
+                   struct employee_t **employeesOut) {
+  if (fd < 0) {
+    printf("Got a bad FD from the user\n");
+    return STATUS_ERROR;
+  }
 
-int output_file(int fd, struct dbheader_t *dbhdr) {
+  int count = dbhdr->count;
+
+  struct employee_t *employees = calloc(count, sizeof(struct employee_t));
+  if (employees == -1) {
+    printf("Malloc failed \n");
+    return STATUS_ERROR;
+  }
+
+  read(fd, employees, count * sizeof(struct employee_t));
+
+  int i;
+  for (i = 0; i < count; i++) {
+    employees[i].hours = ntohl(employees[i].hours);
+  }
+
+  *employeesOut = employees;
+
+  return STATUS_SUCCESS;
+}
+
+int output_file(int fd, struct dbheader_t *dbhdr,
+                struct employee_t *employees) {
   if (fd < 0) {
     printf("Got a bad FD from the user\n");
     return STATUS_ERROR;

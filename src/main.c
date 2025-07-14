@@ -1,8 +1,10 @@
+// #include <bits/getopt_core.h>
 #include <endian.h>
 #include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "file.h"
@@ -17,14 +19,16 @@ void print_usage(char *argv[]) {
 
 int main(int argc, char *argv[]) {
   char *filepath = NULL;
+  char *addstring = NULL;
   bool newfile = false;
   bool newemp = false;
   int c;
 
   int dbfd = -1; // database filedescriptor
   struct dbheader_t *dbhdr = NULL;
+  struct employee_t *employees = NULL;
 
-  while ((c = getopt(argc, argv, "nf:")) != -1) {
+  while ((c = getopt(argc, argv, "nf:a:")) != -1) { //: means that it has data
     switch (c) {
     case 'n':
       newfile = true;
@@ -34,6 +38,8 @@ int main(int argc, char *argv[]) {
       break;
     case 'a':
       newemp = true;
+      addstring = optarg;
+      break;
     case '?':
       printf("Unkown option -%c\n", c);
       break;
@@ -72,10 +78,19 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  if (read_employees(dbfd, dbhdr, &employees) != STATUS_SUCCESS) {
+    printf("Failed to read employees");
+    return 0;
+  }
+
+  if (addstring) {
+    add_employee(dbhdr, employees, addstring);
+  }
+
   printf("Newfile: %d\n", newfile);
   printf("Filepath: %s\n", filepath);
 
-  output_file(dbfd, dbhdr);
+  output_file(dbfd, dbhdr, employees);
 
   return 0;
 }
