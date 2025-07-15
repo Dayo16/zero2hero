@@ -1,6 +1,8 @@
 #include <arpa/inet.h>
+#include <asm-generic/errno-base.h>
 #include <float.h>
 #include <netinet/in.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +18,19 @@ void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {}
 int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
                  char *addstring) {
   printf("Add string value: %s\n", addstring);
+
+  char *name = strtok(addstring, ",");
+  char *addr = strtok(NULL, ",");
+  char *hours = strtok(NULL, ",");
+
+  printf("Extracted string: %s %s %s\n", name, addr, hours);
+
+  strncpy(employees[dbhdr->count - 1].name, name,
+          sizeof(employees[dbhdr->count - 1].name));
+  strncpy(employees[dbhdr->count - 1].address, addr,
+          sizeof(employees[dbhdr->count - 1].address));
+
+  employees[dbhdr->count - 1].hours = atoi(hours);
 
   return STATUS_SUCCESS;
 }
@@ -54,14 +69,26 @@ int output_file(int fd, struct dbheader_t *dbhdr,
     return STATUS_ERROR;
   }
 
+  int realcount = dbhdr->count;
+
+  printf("headermagic: %u", dbhdr->magic);
+
   dbhdr->magic = htonl(dbhdr->magic);
-  dbhdr->filesize = htonl(dbhdr->filesize);
-  dbhdr->count = htons(dbhdr->filesize);
+  dbhdr->filesize =
+      htonl(sizeof(struct dbheader_t) + sizeof(struct employee_t) * realcount);
+  dbhdr->count = htons(dbhdr->count);
   dbhdr->version = htons(dbhdr->version);
 
   lseek(fd, 0, SEEK_SET);
 
   write(fd, dbhdr, sizeof(struct dbheader_t));
+
+  int i;
+  for (i = 0; i < realcount; i++) {
+    employees[i].hours = htonl(employees[i].hours);
+    write(fd, &employees[i], sizeof(struct employee_t));
+  }
+
   return 0;
 }
 
