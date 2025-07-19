@@ -13,17 +13,21 @@
 #include "common.h"
 #include "parse.h"
 
-void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {}
+void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
+  int i;
+  for (i = 0; i < dbhdr->count; i++) {
+    printf("Employee %d\n", i);
+    printf("\tName: %s\n", employees[i].name);
+    printf("\tAddress: %s\n", employees[i].address);
+    printf("\tHours: %u\n", employees[i].hours);
+  }
+}
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
                  char *addstring) {
-  printf("Add string value: %s\n", addstring);
-
   char *name = strtok(addstring, ",");
   char *addr = strtok(NULL, ",");
   char *hours = strtok(NULL, ",");
-
-  printf("Extracted string: %s %s %s\n", name, addr, hours);
 
   strncpy(employees[dbhdr->count - 1].name, name,
           sizeof(employees[dbhdr->count - 1].name));
@@ -34,6 +38,20 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
 
   return STATUS_SUCCESS;
 }
+
+int remove_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
+                    char *name) {
+  int i = 0;
+  for (i; i < dbhdr->count; i++) {
+    if (employees[i].name == name) {
+    }
+  }
+
+  return STATUS_SUCCESS;
+}
+
+int update_hours(struct dbheader_t *dbhdr, struct employee_t *employees,
+                 char *name) {}
 
 int read_employees(int fd, struct dbheader_t *dbhdr,
                    struct employee_t **employeesOut) {

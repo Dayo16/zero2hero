@@ -1,4 +1,3 @@
-// #include <bits/getopt_core.h>
 #include <endian.h>
 #include <getopt.h>
 #include <stdbool.h>
@@ -20,15 +19,18 @@ void print_usage(char *argv[]) {
 int main(int argc, char *argv[]) {
   char *filepath = NULL;
   char *addstring = NULL;
+  char *removeName = NULL;
+  char *updateName = NULL;
   bool newfile = false;
-  bool newemp = false;
+  bool list = false;
   int c;
 
   int dbfd = -1; // database filedescriptor
   struct dbheader_t *dbhdr = NULL;
   struct employee_t *employees = NULL;
 
-  while ((c = getopt(argc, argv, "nf:a:")) != -1) { //: means that it has data
+  while ((c = getopt(argc, argv, "nf:a:lr:u:")) !=
+         -1) { //: means that it has data
     switch (c) {
     case 'n':
       newfile = true;
@@ -37,8 +39,16 @@ int main(int argc, char *argv[]) {
       filepath = optarg;
       break;
     case 'a':
-      newemp = true;
       addstring = optarg;
+      break;
+    case 'l':
+      list = true;
+      break;
+    case 'r':
+      removeName = optarg;
+      break;
+    case 'u':
+      updateName = optarg;
       break;
     case '?':
       printf("Unkown option -%c\n", c);
@@ -87,6 +97,18 @@ int main(int argc, char *argv[]) {
     dbhdr->count++;
     employees = realloc(employees, dbhdr->count * (sizeof(struct employee_t)));
     add_employee(dbhdr, employees, addstring);
+  }
+
+  if (list) {
+    list_employees(dbhdr, employees);
+  }
+
+  if (removeName) {
+    remove_employee(dbhdr, employees, removeName);
+  }
+
+  if (updateName) {
+    update_hours(dbhdr, employees, updateName);
   }
 
   printf("Newfile: %d\n", newfile);
