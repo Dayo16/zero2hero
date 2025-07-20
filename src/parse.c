@@ -2,6 +2,7 @@
 #include <asm-generic/errno-base.h>
 #include <float.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,12 +42,19 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
 
 int remove_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
                     char *name) {
+  bool namefound = false;
   int i = 0;
+
   for (i; i < dbhdr->count; i++) {
     if (employees[i].name == name) {
+
+      namefound = true;
     }
   }
 
+  if (!namefound) {
+    return STATUS_ERROR;
+  }
   return STATUS_SUCCESS;
 }
 

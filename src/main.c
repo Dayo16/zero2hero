@@ -10,17 +10,24 @@
 #include "parse.h"
 
 void print_usage(char *argv[]) {
-  printf("Usage: %s -n -f <database file>\n", argv[0]);
-  printf("\t -n - create new database file\n");
+  printf(
+      "Usage: %s -f <database file> -n -l -a <new employee -r <employee id> -u "
+      "<employee id, hours>\n",
+      argv[0]);
   printf("\t -f - (required path to database file\n");
+  printf("\t -n - create new database file\n");
+  printf("\t -l - list all employees in database\n");
+  printf("\t -a - add employee to database\n");
+  printf("\t -r - remove employee from database\n");
+  printf("\t -u - update employee hours\n");
   return;
 }
 
 int main(int argc, char *argv[]) {
   char *filepath = NULL;
   char *addstring = NULL;
-  char *removeName = NULL;
-  char *updateName = NULL;
+  char *remstring = NULL;
+  char *upstring = NULL;
   bool newfile = false;
   bool list = false;
   int c;
@@ -45,10 +52,10 @@ int main(int argc, char *argv[]) {
       list = true;
       break;
     case 'r':
-      removeName = optarg;
+      remstring = optarg;
       break;
     case 'u':
-      updateName = optarg;
+      upstring = optarg;
       break;
     case '?':
       printf("Unkown option -%c\n", c);
@@ -103,16 +110,29 @@ int main(int argc, char *argv[]) {
     list_employees(dbhdr, employees);
   }
 
-  if (removeName) {
-    remove_employee(dbhdr, employees, removeName);
+  if (remstring) {
+    if (remove_employee(dbhdr, employees, remstring) == STATUS_ERROR) {
+      if (dbhdr->count <= 0) {
+        printf("Failed remove: database empty\n");
+      } else {
+        printf("Failed remove: couldn't find id\n");
+      }
+      return -1;
+    }
   }
 
-  if (updateName) {
-    update_hours(dbhdr, employees, updateName);
+  if (upstring) {
+    if (update_hours(dbhdr, employees, upstring) == STATUS_ERROR) {
+      if (dbhdr->count <= 0) {
+        printf("Failed update hours: database empty\n");
+      } else {
+        printf("Failed update hours: couldn't find id\n");
+      }
+    }
   }
 
-  printf("Newfile: %d\n", newfile);
-  printf("Filepath: %s\n", filepath);
+  //  printf("Newfile: %d\n", newfile);
+  //  printf("Filepath: %s\n", filepath);
 
   output_file(dbfd, dbhdr, employees);
 
