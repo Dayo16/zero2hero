@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <asm-generic/errno-base.h>
 #include <float.h>
+#include <iso646.h>
 #include <netinet/in.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -17,7 +18,8 @@
 void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
   int i;
   for (i = 0; i < dbhdr->count; i++) {
-    printf("Employee %d\n", i);
+    printf("Employee %d\n", i + 1);
+    printf("\tID: %u\n", employees[i].id);
     printf("\tName: %s\n", employees[i].name);
     printf("\tAddress: %s\n", employees[i].address);
     printf("\tHours: %u\n", employees[i].hours);
@@ -37,16 +39,50 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
 
   employees[dbhdr->count - 1].hours = atoi(hours);
 
+  if (getUniqueID(dbhdr, employees) != 0) {
+    printf("Couldn't get ID\n");
+    return STATUS_ERROR;
+  }
+  return STATUS_SUCCESS;
+}
+
+int getUniqueID(struct dbheader_t *dbhdr, struct employee_t *employees) {
+  if (dbhdr->count - 1 == 0) {
+    employees[dbhdr->count - 1].id = 1;
+  } else {
+    uint i = 0;
+    uint j = 0;
+    uint xorResult = 0;
+    uint checkarr[dbhdr->count - 1];
+    uint actarr[dbhdr->count - 1];
+    for (i; i < dbhdr->count - 1; i++) {
+      checkarr[i] = i + 1;
+      actarr[i] = employees[i].id;
+      xorResult = xorResult + actarr[i] ^ checkarr[i];
+    }
+    printf("xorResult = %u\n", xorResult);
+    if (xorResult) {
+      employees[dbhdr->count - 1].id = xorResult;
+    }
+    employees[dbhdr->count - 1].id = dbhdr->count;
+
+    for (j; j < dbhdr->count - 1; j++) {
+      if (actarr[j] == employees[dbhdr->count - 1].id) {
+        return STATUS_ERROR;
+      }
+    }
+  }
+
   return STATUS_SUCCESS;
 }
 
 int remove_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
-                    char *name) {
+                    char *id) {
   bool namefound = false;
   int i = 0;
 
   for (i; i < dbhdr->count; i++) {
-    if (employees[i].name == name) {
+    if (employees[i].id == atoi(id)) {
 
       namefound = true;
     }
@@ -97,7 +133,7 @@ int output_file(int fd, struct dbheader_t *dbhdr,
 
   int realcount = dbhdr->count;
 
-  printf("headermagic: %u", dbhdr->magic);
+  printf("headermagic: %u\n", dbhdr->magic);
 
   dbhdr->magic = htonl(dbhdr->magic);
   dbhdr->filesize =

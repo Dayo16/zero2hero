@@ -29,5 +29,6 @@ int remove_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
                     char *removestring);
 int update_hours(struct dbheader_t *dbhdr, struct employee_t *employees,
                  char *updatestring);
+int getUniqueID(struct dbheader_t *dbhdr, struct employee_t *employees);
 
 #endif
