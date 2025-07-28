@@ -30,7 +30,18 @@ int open_db_file(char *filename) {
   int fd = open(filename, O_RDWR | O_CREAT, 0644);
   if (fd == -1) {
     perror("open");
-    printf("Error in file.c create_db_file \n");
+    printf("Error in file.c open_db_file \n");
+    return STATUS_ERROR;
+  }
+
+  return fd;
+}
+
+int trunc_db_file(char *filename) {
+  int fd = open(filename, O_RDWR | O_TRUNC, 0644);
+  if (fd == -1) {
+    perror("open");
+    printf("Error in file.c trunc_db_file \n");
     return STATUS_ERROR;
   }
 

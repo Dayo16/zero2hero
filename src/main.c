@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (remstring) {
-    if (remove_employee(dbhdr, employees, remstring) == STATUS_ERROR) {
+    if (remove_employee(dbhdr, &employees, remstring) == STATUS_ERROR) {
       if (dbhdr->count <= 0) {
         printf("Failed remove: database empty\n");
       } else {
@@ -119,6 +119,7 @@ int main(int argc, char *argv[]) {
       }
       return -1;
     }
+    dbfd = trunc_db_file(filepath);
   }
 
   if (upstring) {

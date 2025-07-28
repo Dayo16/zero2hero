@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "file.h"
 #include "parse.h"
 
 void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
@@ -39,30 +40,28 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
 
   employees[dbhdr->count - 1].hours = atoi(hours);
 
-  if (getUniqueID(dbhdr, employees) != 0) {
+  if (get_id(dbhdr, employees) != 0) {
     printf("Couldn't get ID\n");
     return STATUS_ERROR;
   }
   return STATUS_SUCCESS;
 }
 
-int getUniqueID(struct dbheader_t *dbhdr, struct employee_t *employees) {
+int get_id(struct dbheader_t *dbhdr, struct employee_t *employees) {
   if (dbhdr->count - 1 == 0) {
     employees[dbhdr->count - 1].id = 1;
   } else {
     uint i = 0;
     uint j = 0;
-    uint xorResult = 0;
-    uint checkarr[dbhdr->count - 1];
+    uint xorresult = 0;
     uint actarr[dbhdr->count - 1];
     for (i; i < dbhdr->count - 1; i++) {
-      checkarr[i] = i + 1;
       actarr[i] = employees[i].id;
-      xorResult = xorResult + actarr[i] ^ checkarr[i];
+      xorresult += actarr[i] ^ (i + 1);
     }
-    printf("xorResult = %u\n", xorResult);
-    if (xorResult) {
-      employees[dbhdr->count - 1].id = xorResult;
+    printf("xorResult = %u\n", xorresult);
+    if (xorresult) {
+      employees[dbhdr->count - 1].id = xorresult;
     }
     employees[dbhdr->count - 1].id = dbhdr->count;
 
@@ -76,21 +75,51 @@ int getUniqueID(struct dbheader_t *dbhdr, struct employee_t *employees) {
   return STATUS_SUCCESS;
 }
 
-int remove_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
+int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees,
                     char *id) {
-  bool namefound = false;
+  bool idfound = false;
   int i = 0;
+  uint targetid = atoi(id);
+
+  if (targetid == 0) {
+    printf("Target id should be numeric and higher than 0\n");
+    return STATUS_ERROR;
+  }
+
+  if (dbhdr->count - 1 == 0) {
+    free(*employees);
+    *employees = NULL;
+    printf("Employees database is emptied\n");
+    return STATUS_SUCCESS;
+  }
 
   for (i; i < dbhdr->count; i++) {
-    if (employees[i].id == atoi(id)) {
+    if ((*employees)[i].id == targetid) {
+      printf("Removed employee %s, with ID %u\n", (*employees)[i].name,
+             (*employees)[i].id);
 
-      namefound = true;
+      dbhdr->count--;
+      memmove(&(*employees)[i], &(*employees)[i + 1],
+              (dbhdr->count - i) * sizeof(struct employee_t));
+
+      struct employee_t *temployees =
+          realloc(*employees, dbhdr->count * sizeof(struct employee_t));
+      if (temployees != NULL) {
+        *employees = temployees;
+      } else {
+        printf("Realloc failure\n");
+        return STATUS_ERROR;
+      }
+
+      idfound = true;
+      break;
     }
   }
 
-  if (!namefound) {
+  if (!idfound) {
     return STATUS_ERROR;
   }
+
   return STATUS_SUCCESS;
 }
 
@@ -132,14 +161,19 @@ int output_file(int fd, struct dbheader_t *dbhdr,
   }
 
   int realcount = dbhdr->count;
+  printf("realcount = %u\n", realcount);
+  // printf("headermagic: %u\n", dbhdr->magic);
 
-  printf("headermagic: %u\n", dbhdr->magic);
+  // printf("dbheader_t size = %u\n", sizeof(struct dbheader_t));
+  //  printf("employee_t size = %u\n", sizeof(struct employee_t));
 
   dbhdr->magic = htonl(dbhdr->magic);
   dbhdr->filesize =
       htonl(sizeof(struct dbheader_t) + sizeof(struct employee_t) * realcount);
   dbhdr->count = htons(dbhdr->count);
   dbhdr->version = htons(dbhdr->version);
+
+  printf("filesize = %u\n", dbhdr->filesize);
 
   lseek(fd, 0, SEEK_SET);
 
@@ -163,7 +197,7 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
   struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
 
   if (header == -1) {
-    printf("Malloc failed to create db header\n");
+    printf("Calloc failed to create db header\n");
     return STATUS_ERROR;
   }
 
@@ -194,7 +228,10 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
   struct stat dbstat = {0};
   fstat(fd, &dbstat);
   if (header->filesize != dbstat.st_size) {
-    printf("Corrupted database\n");
+    printf("Corrupted database, reason filesize mismatch\n");
+    printf("Expected filesize : %u\n", header->filesize);
+    printf("Actual filesize : %u\n", dbstat.st_size);
+
     free(header);
     return -1;
   }
