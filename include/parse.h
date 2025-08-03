@@ -1,6 +1,8 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include <stdint.h>
+#include <sys/types.h>
 #define HEADER_MAGIC 0x4c4c4144
 
 struct dbheader_t {
@@ -27,8 +29,8 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
                  char *addstring);
 int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees,
                     char *removestring);
-int update_hours(struct dbheader_t *dbhdr, struct employee_t *employees,
+int update_hours(struct dbheader_t *dbhdr, struct employee_t **employees,
                  char *updatestring);
-int get_id(struct dbheader_t *dbhdr, struct employee_t *employees);
+void get_id(struct dbheader_t *dbhdr, struct employee_t *employees);
 
 #endif

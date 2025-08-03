@@ -13,11 +13,13 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "file.h"
 #include "parse.h"
 
 void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
   int i;
+  if (dbhdr->count == 0) {
+    printf("DB is empty\n");
+  }
   for (i = 0; i < dbhdr->count; i++) {
     printf("Employee %d\n", i + 1);
     printf("\tID: %u\n", employees[i].id);
@@ -39,40 +41,43 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees,
           sizeof(employees[dbhdr->count - 1].address));
 
   employees[dbhdr->count - 1].hours = atoi(hours);
+  get_id(dbhdr, employees);
 
-  if (get_id(dbhdr, employees) != 0) {
-    printf("Couldn't get ID\n");
-    return STATUS_ERROR;
-  }
   return STATUS_SUCCESS;
 }
 
-int get_id(struct dbheader_t *dbhdr, struct employee_t *employees) {
+void get_id(struct dbheader_t *dbhdr, struct employee_t *employees) {
   if (dbhdr->count - 1 == 0) {
     employees[dbhdr->count - 1].id = 1;
-  } else {
-    uint i = 0;
-    uint j = 0;
-    uint xorresult = 0;
-    uint actarr[dbhdr->count - 1];
-    for (i; i < dbhdr->count - 1; i++) {
-      actarr[i] = employees[i].id;
-      xorresult += actarr[i] ^ (i + 1);
-    }
-    printf("xorResult = %u\n", xorresult);
-    if (xorresult) {
-      employees[dbhdr->count - 1].id = xorresult;
-    }
-    employees[dbhdr->count - 1].id = dbhdr->count;
+    return;
+  }
 
-    for (j; j < dbhdr->count - 1; j++) {
-      if (actarr[j] == employees[dbhdr->count - 1].id) {
-        return STATUS_ERROR;
+  uint i;
+  uint oldEmpCount = dbhdr->count - 1;
+  uint actarr[dbhdr->count - 1];
+  uint maxID = 0;
+  uint newID = 0;
+  bool existingID;
+
+  for (newID = 1; newID <= oldEmpCount; newID++) {
+    for (i = 0; i < oldEmpCount; i++) {
+      existingID = (employees[i].id == newID) ? true : false;
+      if (existingID) {
+        break;
       }
+    }
+
+    if (newID == oldEmpCount) {
+      employees[dbhdr->count - 1].id = dbhdr->count;
+      break;
+    }
+    if (!existingID) {
+      employees[oldEmpCount].id = newID;
+      break;
     }
   }
 
-  return STATUS_SUCCESS;
+  return;
 }
 
 int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees,
@@ -123,8 +128,36 @@ int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees,
   return STATUS_SUCCESS;
 }
 
-int update_hours(struct dbheader_t *dbhdr, struct employee_t *employees,
-                 char *name) {}
+int update_hours(struct dbheader_t *dbhdr, struct employee_t **employees,
+                 char *updatestring) {
+  bool idfound = false;
+  int i = 0;
+  uint targetid = atoi(strtok(updatestring, ","));
+  char *hours = strtok(updatestring, ",");
+
+  if (targetid == 0) {
+    printf("Target id should be numeric and higher than 0\n");
+    return STATUS_ERROR;
+  }
+
+  for (i; i < dbhdr->count; i++) {
+    if ((*employees)[i].id == targetid) {
+      (*employees)[i].hours = atoi(hours);
+
+      printf("Updated employee %s, with ID %u\n", (*employees)[i].name,
+             (*employees)[i].id);
+
+      idfound = true;
+      break;
+    }
+  }
+
+  if (!idfound) {
+    return STATUS_ERROR;
+  }
+
+  return STATUS_SUCCESS;
+}
 
 int read_employees(int fd, struct dbheader_t *dbhdr,
                    struct employee_t **employeesOut) {
@@ -161,7 +194,7 @@ int output_file(int fd, struct dbheader_t *dbhdr,
   }
 
   int realcount = dbhdr->count;
-  printf("realcount = %u\n", realcount);
+  //  printf("realcount = %u\n", realcount);
   // printf("headermagic: %u\n", dbhdr->magic);
 
   // printf("dbheader_t size = %u\n", sizeof(struct dbheader_t));
@@ -173,7 +206,7 @@ int output_file(int fd, struct dbheader_t *dbhdr,
   dbhdr->count = htons(dbhdr->count);
   dbhdr->version = htons(dbhdr->version);
 
-  printf("filesize = %u\n", dbhdr->filesize);
+  // printf("filesize = %u\n", dbhdr->filesize);
 
   lseek(fd, 0, SEEK_SET);
 
