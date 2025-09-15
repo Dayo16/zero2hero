@@ -52,11 +52,11 @@ void get_id(struct dbheader_t *dbhdr, struct employee_t *employees) {
     return;
   }
 
-  uint i;
-  uint oldEmpCount = dbhdr->count - 1;
-  uint actarr[dbhdr->count - 1];
-  uint maxID = 0;
-  uint newID = 0;
+  unsigned int i;
+  unsigned int oldEmpCount = dbhdr->count - 1;
+  unsigned int actarr[dbhdr->count - 1];
+  unsigned int maxID = 0;
+  unsigned int newID = 0;
   bool existingID;
 
   for (newID = 1; newID <= oldEmpCount; newID++) {
@@ -84,7 +84,7 @@ int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees,
                     char *id) {
   bool idfound = false;
   int i = 0;
-  uint targetid = atoi(id);
+  unsigned int targetid = atoi(id);
 
   if (targetid == 0) {
     printf("Target id should be numeric and higher than 0\n");
@@ -132,7 +132,7 @@ int update_hours(struct dbheader_t *dbhdr, struct employee_t **employees,
                  char *updatestring) {
   bool idfound = false;
   int i = 0;
-  uint targetid = atoi(strtok(updatestring, ","));
+  unsigned int targetid = atoi(strtok(updatestring, ","));
   char *hours = strtok(updatestring, ",");
 
   if (targetid == 0) {
