@@ -8,9 +8,9 @@
       "obj/file.o",
       "src/file.c"
     ],
-    "directory": "/home/dayo/low_level/zero_2_hero/dbproj",
-    "file": "/home/dayo/low_level/zero_2_hero/dbproj/src/file.c",
-    "output": "/home/dayo/low_level/zero_2_hero/dbproj/obj/file.o"
+    "directory": "/home/dayo/low_level/dbproject/dbproj",
+    "file": "/home/dayo/low_level/dbproject/dbproj/src/file.c",
+    "output": "/home/dayo/low_level/dbproject/dbproj/obj/file.o"
   },
   {
     "arguments": [
@@ -21,9 +21,9 @@
       "obj/main.o",
       "src/main.c"
     ],
-    "directory": "/home/dayo/low_level/zero_2_hero/dbproj",
-    "file": "/home/dayo/low_level/zero_2_hero/dbproj/src/main.c",
-    "output": "/home/dayo/low_level/zero_2_hero/dbproj/obj/main.o"
+    "directory": "/home/dayo/low_level/dbproject/dbproj",
+    "file": "/home/dayo/low_level/dbproject/dbproj/src/main.c",
+    "output": "/home/dayo/low_level/dbproject/dbproj/obj/main.o"
   },
   {
     "arguments": [
@@ -34,8 +34,8 @@
       "obj/parse.o",
       "src/parse.c"
     ],
-    "directory": "/home/dayo/low_level/zero_2_hero/dbproj",
-    "file": "/home/dayo/low_level/zero_2_hero/dbproj/src/parse.c",
-    "output": "/home/dayo/low_level/zero_2_hero/dbproj/obj/parse.o"
+    "directory": "/home/dayo/low_level/dbproject/dbproj",
+    "file": "/home/dayo/low_level/dbproject/dbproj/src/parse.c",
+    "output": "/home/dayo/low_level/dbproject/dbproj/obj/parse.o"
   }
 ]
